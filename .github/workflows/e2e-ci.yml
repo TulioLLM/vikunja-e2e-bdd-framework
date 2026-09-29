@@ -42,6 +42,8 @@ jobs:
 
       - name: Instalación limpia de dependencias
         run: npm ci
+        env:
+          HUSKY: 0
 
       - name: Instalar navegadores de Playwright
         run: npx playwright install --with-deps chromium
