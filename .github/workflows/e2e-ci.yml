@@ -2,9 +2,9 @@ name: E2E Regression Suite
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [master, main]
   pull_request:
-    branches: [ master, main ]
+    branches: [master, main]
   workflow_dispatch:
 
 concurrency:
@@ -15,34 +15,6 @@ jobs:
   e2e-tests:
     timeout-minutes: 15
     runs-on: ubuntu-latest
-
-    services:
-      db:
-        image: postgres:18
-        env:
-          POSTGRES_USER: vikunja
-          POSTGRES_PASSWORD: vikunjapassword
-          POSTGRES_DB: vikunja
-        options: >-
-          --health-cmd "pg_isready -U vikunja"
-          --health-interval 2s
-          --health-timeout 5s
-          --health-retries 10
-
-      vikunja:
-        image: vikunja/vikunja:2.6.0
-        env:
-          VIKUNJA_SERVICE_PUBLICURL: http://127.0.0.1:3456/
-          VIKUNJA_SERVICE_ENABLEREGISTRATION: 'true'
-          VIKUNJA_SERVICE_JWTSECRET: ci-secret-key-32-bytes-long-12345
-          VIKUNJA_SERVICE_SECRET: ci-secret-key-32-bytes-long-12345
-          VIKUNJA_DATABASE_HOST: db
-          VIKUNJA_DATABASE_TYPE: postgres
-          VIKUNJA_DATABASE_USER: vikunja
-          VIKUNJA_DATABASE_PASSWORD: vikunjapassword
-          VIKUNJA_DATABASE_DATABASE: vikunja
-        ports:
-          - 3456:3456
 
     steps:
       - name: Checkout del código
@@ -60,6 +32,11 @@ jobs:
       - name: Instalar navegadores de Playwright
         run: npx playwright install --with-deps chromium
 
+      - name: Levantar Vikunja y Postgres con Docker Compose
+        run: docker compose up -d
+        env:
+          VIKUNJA_SERVICE_SECRET: ci-secret-key-32-bytes-long-12345
+
       - name: Esperar a que la API responda
         run: npx tsx scripts/smoke-check.ts
 
@@ -67,6 +44,10 @@ jobs:
         run: |
           npx bddgen
           npx playwright test
+
+      - name: Apagar contenedores Docker
+        if: always()
+        run: docker compose down -v
 
       - name: Subir reporte HTML de Playwright
         if: always()
