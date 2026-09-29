@@ -15,6 +15,8 @@ jobs:
   e2e-tests:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    env:
+      VIKUNJA_SERVICE_SECRET: ci-secret-key-32-bytes-long-12345
 
     steps:
       - name: Checkout del código
@@ -34,11 +36,15 @@ jobs:
 
       - name: Levantar Vikunja y Postgres con Docker Compose
         run: docker compose up -d
-        env:
-          VIKUNJA_SERVICE_SECRET: ci-secret-key-32-bytes-long-12345
 
       - name: Esperar a que la API responda
         run: npx tsx scripts/smoke-check.ts
+
+      - name: Diagnosticar contenedores si falla el smoke check
+        if: failure()
+        run: |
+          docker compose ps --all
+          docker compose logs --no-color --tail=100 vikunja db
 
       - name: Generar especificaciones BDD y ejecutar tests
         run: |

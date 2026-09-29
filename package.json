@@ -16,6 +16,22 @@
     "format:check": "prettier --check \"**/*.{ts,json,md}\"",
     "prepare": "node -e \"if (!process.env.CI) { try { require('child_process').execSync('husky', { stdio: 'inherit' }); } catch {} }\""
   },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@playwright/test": "1.62.1",
+    "@typescript-eslint/eslint-plugin": "8.49.0",
+    "@typescript-eslint/parser": "8.49.0",
+    "cross-env": "10.1.0",
+    "eslint": "9.39.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-playwright": "2.4.0",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.7",
+    "playwright-bdd": "9.2.1",
+    "prettier": "3.7.4",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  },
   "lint-staged": {
     "*.ts": [
       "eslint --fix",
