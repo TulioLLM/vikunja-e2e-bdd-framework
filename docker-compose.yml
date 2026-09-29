@@ -1,4 +1,12 @@
 services:
+  vikunja-files-permissions:
+    image: alpine:3.22
+    user: '0:0'
+    command: ['sh', '-c', 'chown -R 1000:0 /files']
+    volumes:
+      - vikunja_files:/files
+    restart: 'no'
+
   db:
     image: postgres:18
     environment:
@@ -18,6 +26,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      vikunja-files-permissions:
+        condition: service_completed_successfully
     environment:
       VIKUNJA_SERVICE_PUBLICURL: http://127.0.0.1:3456/
       VIKUNJA_SERVICE_ENABLEREGISTRATION: 'true'
