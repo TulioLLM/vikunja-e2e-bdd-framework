@@ -1,0 +1,88 @@
+name: E2E Regression Suite
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-tests:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: vikunja
+          POSTGRES_PASSWORD: vikunjapassword
+          POSTGRES_DB: vikunja
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: 'npm'
+
+      - name: Instalación limpia de dependencias
+        run: npm ci
+
+      - name: Instalar navegadores de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Levantar servicio de Vikunja
+        env:
+          VIKUNJA_SERVICE_JWTSECRET: ${{ secrets.VIKUNJA_SERVICE_SECRET || 'ci-secret-key-32-bytes-long-12345' }}
+          VIKUNJA_DATABASE_HOST: postgres
+          VIKUNJA_DATABASE_PASSWORD: vikunjapassword
+          VIKUNJA_DATABASE_TYPE: postgres
+          VIKUNJA_DATABASE_USER: vikunja
+          VIKUNJA_DATABASE_DATABASE: vikunja
+          VIKUNJA_SERVICE_ENABLEREGISTRATION: 'true'
+          VIKUNJA_SERVICE_FRONTENDURL: 'http://127.0.0.1:3456/'
+        run: |
+          docker run -d \
+            --name vikunja \
+            --network ${{ job.container.network || 'bridge' }} \
+            -p 3456:3456 \
+            -e VIKUNJA_SERVICE_JWTSECRET="$VIKUNJA_SERVICE_JWTSECRET" \
+            -e VIKUNJA_DATABASE_HOST="postgres" \
+            -e VIKUNJA_DATABASE_PASSWORD="$VIKUNJA_DATABASE_PASSWORD" \
+            -e VIKUNJA_DATABASE_TYPE="$VIKUNJA_DATABASE_TYPE" \
+            -e VIKUNJA_DATABASE_USER="$VIKUNJA_DATABASE_USER" \
+            -e VIKUNJA_DATABASE_DATABASE="$VIKUNJA_DATABASE_DATABASE" \
+            -e VIKUNJA_SERVICE_ENABLEREGISTRATION="$VIKUNJA_SERVICE_ENABLEREGISTRATION" \
+            -e VIKUNJA_SERVICE_FRONTENDURL="$VIKUNJA_SERVICE_FRONTENDURL" \
+            vikunja/vikunja:2.6.0
+
+      - name: Esperar a que la API responda
+        run: npx tsx scripts/smoke-check.ts
+
+      - name: Generar especificaciones BDD y ejecutar tests
+        run: |
+          npx bddgen
+          npx playwright test
+
+      - name: Subir reporte HTML de Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
