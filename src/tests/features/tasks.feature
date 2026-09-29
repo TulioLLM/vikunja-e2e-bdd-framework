@@ -1,4 +1,4 @@
-@tasks
+@tasks @E2E @custom-test-tag
 Feature: Gestión de tareas en un proyecto
 
   Background:

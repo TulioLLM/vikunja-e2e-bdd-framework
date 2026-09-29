@@ -1,11 +1,13 @@
 name: E2E Regression Suite
 
 on:
-  push:
-    branches: [master, main]
-  pull_request:
-    branches: [master, main]
   workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Gherkin tags to run (e.g. @E2E or @E2E|@custom-test-tag)'
+        required: true
+        default: '@E2E'
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -47,9 +49,11 @@ jobs:
           docker compose logs --no-color --tail=100 vikunja db
 
       - name: Generar especificaciones BDD y ejecutar tests
+        env:
+          PLAYWRIGHT_TAGS: ${{ inputs.tags }}
         run: |
           npx bddgen
-          npx playwright test
+          npx playwright test --grep "$PLAYWRIGHT_TAGS"
 
       - name: Apagar contenedores Docker
         if: always()
