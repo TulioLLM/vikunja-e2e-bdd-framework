@@ -13,11 +13,19 @@ export default [
     files: ['**/*.ts'],
     languageOptions: {
       parser: tsparser,
-      parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: ['./tsconfig.json'],
+      },
     },
-    plugins: { '@typescript-eslint': tseslint, playwright },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      playwright,
+    },
     rules: {
       ...tseslint.configs.recommended.rules,
+      'no-undef': 'off',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],

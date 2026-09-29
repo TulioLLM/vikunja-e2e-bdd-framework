@@ -12,8 +12,12 @@
     "rootDir": "./",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@api/*": ["./src/api/*"],
+      "@fixtures/*": ["./src/tests/fixtures/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@locators/*": ["./src/locators/*"]
     }
   },
-  "include": ["src/**/*", "playwright.config.ts", "eslint.config.mjs"]
+  "include": ["src/**/*", "scripts/**/*", "playwright.config.ts", "eslint.config.mjs"]
 }
