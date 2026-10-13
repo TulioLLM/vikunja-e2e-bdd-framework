@@ -27,17 +27,22 @@ export default [
       ...tseslint.configs.recommended.rules,
       'no-undef': 'off',
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       ...playwright.configs.recommended.rules,
       'playwright/no-focused-test': 'error',
-      'playwright/no-wait-for-timeout': 'warn',
+      'playwright/no-wait-for-timeout': 'error',
       'playwright/prefer-web-first-assertions': 'error',
     },
   },
   {
     files: ['**/step-definitions/**/*.ts'],
     rules: { 'playwright/no-standalone-expect': 'off' },
+  },
+  {
+    // CLI scripts report progress on stdout by design
+    files: ['scripts/**/*.ts'],
+    rules: { 'no-console': 'off' },
   },
   prettier,
 ];
