@@ -14,6 +14,7 @@
     "report": "playwright show-report",
     "env:up": "docker compose up -d && tsx scripts/smoke-check.ts",
     "env:down": "docker compose down -v",
+    "env:purge-users": "tsx scripts/purge-test-users.ts",
     "smoke-check": "tsx scripts/smoke-check.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

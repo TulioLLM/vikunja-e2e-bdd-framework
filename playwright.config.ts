@@ -9,6 +9,7 @@ const testDir = defineBddConfig({
 
 export default defineConfig({
   testDir,
+  globalTeardown: './src/tests/global-teardown.ts',
   fullyParallel: true,
   forbidOnly: env.isCI,
   retries: env.isCI ? 2 : 0,
