@@ -37,6 +37,9 @@ services:
       VIKUNJA_DATABASE_USER: vikunja
       VIKUNJA_DATABASE_PASSWORD: changeme_local_dev
       VIKUNJA_DATABASE_DATABASE: vikunja
+      # Every test registers and logs in its own user; the default unauthenticated
+      # rate limit (10 req/min) would throttle the suite with 429s.
+      VIKUNJA_RATELIMIT_NOAUTHLIMIT: '1000'
     ports:
       - '3456:3456'
     volumes:

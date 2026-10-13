@@ -1,27 +1,34 @@
 {
   "name": "vikunja-e2e-bdd-framework",
   "version": "1.0.0",
-  "description": "Framework de automatización E2E con Playwright + TypeScript + BDD contra Vikunja",
+  "description": "E2E automation framework with Playwright + TypeScript + BDD targeting Vikunja",
   "type": "module",
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=24.19.0"
   },
   "scripts": {
-    "test": "npx bddgen && npx playwright test",
-    "test:headed": "npx bddgen && npx playwright test --headed",
-    "test:ui": "npx bddgen && npx playwright test --ui",
+    "test": "bddgen && playwright test",
+    "test:smoke": "bddgen && playwright test --grep @smoke",
+    "test:headed": "bddgen && playwright test --headed",
+    "test:ui": "bddgen && playwright test --ui",
+    "report": "playwright show-report",
+    "env:up": "docker compose up -d && tsx scripts/smoke-check.ts",
+    "env:down": "docker compose down -v",
+    "smoke-check": "tsx scripts/smoke-check.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,json,md}\"",
+    "check": "npm run lint && npm run typecheck && npm run format:check",
     "prepare": "node -e \"if (!process.env.CI) { try { require('child_process').execSync('husky', { stdio: 'inherit' }); } catch {} }\""
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
     "@playwright/test": "1.62.1",
+    "@types/node": "24.19.2",
     "@typescript-eslint/eslint-plugin": "8.49.0",
     "@typescript-eslint/parser": "8.49.0",
-    "cross-env": "10.1.0",
     "eslint": "9.39.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-playwright": "2.4.0",

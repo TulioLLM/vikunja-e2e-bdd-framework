@@ -1,5 +1,6 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
+import { env } from './src/config/env.js';
 
 const testDir = defineBddConfig({
   features: 'src/tests/features/**/*.feature',
@@ -8,10 +9,20 @@ const testDir = defineBddConfig({
 
 export default defineConfig({
   testDir,
-  reporter: [['html', { open: 'never' }], ['list']],
+  fullyParallel: true,
+  forbidOnly: env.isCI,
+  retries: env.isCI ? 2 : 0,
+  workers: env.workers,
+  timeout: 30_000,
+  expect: { timeout: 10_000 },
+  reporter: env.isCI
+    ? [['html', { open: 'never' }], ['list'], ['github']]
+    : [['html', { open: 'never' }], ['list']],
   use: {
-    baseURL: 'http://127.0.0.1:3456',
-    trace: 'on-first-retry',
+    baseURL: env.baseUrl,
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });
